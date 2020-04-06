@@ -4,12 +4,12 @@ Created on Dec 1, 2017
 '''
 
 import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
+# reload(sys)
+# sys.setdefaultencoding("utf-8")
 
 
-from code.functions import save_file, gather_topic_hierarchy
-import urllib2, json, os, time
+from functions import save_file, gather_topic_hierarchy
+import urllib, json, os, time
 from selenium import webdriver
     
 
@@ -80,7 +80,7 @@ def download_articles(path):
         if article_id not in collected_articles:
             try:
                 article_api = "http://www.khanacademy.org/api/v1/articles/" + article_id
-                response = urllib2.urlopen(article_api)
+                response = urllib.urlopen(article_api)
                 article = json.loads(response.read())
                 save_file(article, path + "articles/" + article_id)
             except:
@@ -94,7 +94,7 @@ def gather_article_ids(path):
     for topic in topic_hierarchy.keys():
         for component in topic_hierarchy[topic]:
             component_topic_relation[component] = topic
-    
+    # print("component_topic_relationcomponent_topic_relation", component_topic_relation)
     article_map = {}
     topic_files = os.listdir(path + "topics/")
     for topic_file in topic_files:
@@ -111,7 +111,7 @@ def gather_article_ids(path):
 
 ######################################################################    
 def main():
-    data_path = '../../data/khan/khan_crawled_data/'
+    data_path = '/home/venktesh/iiit-journey-books-papers/phd-research/LearningQ/data/khan/crawled_data/'
     
     # Step 1: gather article list
     gather_article_ids(data_path)

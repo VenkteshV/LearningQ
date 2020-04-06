@@ -2,7 +2,7 @@
 
 # -*- coding: utf-8 -*-
 
-import urllib2
+import urllib
 import re
 import argparse
 import sys
@@ -75,7 +75,7 @@ def get_title(vid_id):
     @param vid_id: YouTube ID for the video.
     @type vid_id: str
     """
-    video_info = urllib2.urlopen('http://youtube.com/get_video_info?video_id=' + vid_id)
+    video_info = urllib.urlopen('http://youtube.com/get_video_info?video_id=' + vid_id)
     video_info = video_info.read()
     if urlparse.parse_qs(video_info)['status'][0] == 'fail':
         print "WARNING: Couldn't get video title. This probably means you specified an invalid URL."
@@ -91,7 +91,7 @@ def get_transcript():
                       '- The video has "burned-on" captions, where the captions are part of the video track. ' \
                       'There is no way to extract burned-in captions.'
     try:
-        transcript = urllib2.urlopen('http://video.google.com/timedtext?lang=en&v=' + vidinfo.id)
+        transcript = urllib.urlopen('http://video.google.com/timedtext?lang=en&v=' + vidinfo.id)
         transcript_xml = transcript.read()
     except urllib2.HTTPError as error:
         if '404' in str(error):

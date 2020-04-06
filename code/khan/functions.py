@@ -5,6 +5,7 @@ Created on 1 Dec 2017
 
 import json, nltk
 from langdetect import detect
+import pandas as pd
 
 
 def save_file(object, path):
@@ -41,8 +42,12 @@ def gather_subtopics(object, topic_hierarchy):
  
       
 def gather_topic_hierarchy(path):
+    # with open(path+'topictree.json', 'r') as JSON:
+    #     topictree_object = json.load(JSON)
     topictree_object = json.loads(open(path + "topictree.json").read())
+    topictree_object = json.loads(topictree_object)
     topic_hierarchy = {}
+    print(type(topictree_object))
     for element in topictree_object["children"]:
         topic = element["domain_slug"]
         topic_hierarchy[topic] = []

@@ -19,4 +19,4 @@ def list_files(startpath):
         # for f in files:
         #     print('{}{}'.format(subindent, f))
             
-list_files("/Users/Angus/Projects/LearningQ")
+list_files("/home/venktesh/iiit-journey-books-papers/phd-research/LearningQ")

@@ -4,20 +4,20 @@ Created on Dec 1, 2017
 '''
 
 import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
+# reload(sys)
+# sys.setdefaultencoding("utf-8")
 
-from code.functions import save_file, gather_topic_hierarchy
-import urllib2, json, os, time
+from functions import save_file, gather_topic_hierarchy
+import urllib, json, os, time
 from selenium import webdriver
-
+from webdriver_manager.chrome import ChromeDriverManager
 
 def collect_video_discussion(path):
     video_link_map = json.loads(open(path + "all_video_links", "r").read())
     print("There is a total of %d video links." % len(video_link_map))
     
     # Considered topics
-    considered_topic_array = ["science", "humanities", "computing", "partner-content", "economics-finance-domain", "test-prep", "college-careers-more", "math"]
+    considered_topic_array = ["science", "humanities", "computing", "partner-content", "economics-finance-domain", "test-prep", "college-careers-more"]
     
     # Collected videos
     collected_videos= set()
@@ -29,7 +29,7 @@ def collect_video_discussion(path):
             collected_videos.add(collected_file)
     
     # Collect video transcripts
-    driver = webdriver.Chrome(executable_path='../chromedriver')
+    driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.maximize_window()
     for youtube_id in video_link_map.keys():        
         if youtube_id not in collected_videos and os.path.exists(path + "transcripts/" + youtube_id):
@@ -42,20 +42,21 @@ def collect_video_discussion(path):
             time.sleep(3)        
                                 
             more_discussion_mark = True
-            while more_discussion_mark:
-                try:
-                    element = driver.find_element_by_xpath("//input[@value='Show more comments']")
-                    driver.execute_script("arguments[0].scrollIntoView();", element)
+            # while more_discussion_mark:
+                # try:
+                #     element = driver.find_element_by_xpath("//input[@value='Show more comments']")
+                #     driver.execute_script("arguments[0].scrollIntoView();", element)
                     
-                    driver.find_element_by_xpath("//input[@value='Show more comments']").click()
-                    time.sleep(2)
-                except Exception as e:
-                    # print("More discussion button error...\t%s" % e)
-                    more_discussion_mark = False
+                #     driver.find_element_by_xpath("//input[@value='Show more comments']").click()
+                #     time.sleep(2)
+                # except Exception as e:
+                #     # print("More discussion button error...\t%s" % e)
+                #     more_discussion_mark = False
                     
             try:                
                 discussion_array = []
-                questions = driver.find_elements_by_xpath('//div[@class="thread "]/div[@class="question  discussion-item"]/div[@class="discussion-content"]')
+                questions = driver.find_elements_by_xpath('//div[@class="_3p5c27i"]/ul')
+                print("questions", questions)
                 for question in questions:
                     discussion_array.append({"question": question.text, "answers":[]})
                 
@@ -81,15 +82,15 @@ def download_transcript_from_khan(path):
     print("There are %d video transcripts have been collected." % len(collected_videos))
     
     # Collect video transcripts
-    driver = webdriver.Chrome(executable_path='../chromedriver')
+    driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.maximize_window()
     
     for youtube_id in video_link_map.keys(): 
-        if youtube_id not in collected_videos:
+        if youtube_id not in collected_videos and video_link_map[youtube_id]["topic_category"] == "science":
             driver.get(video_link_map[youtube_id]["ka_url"])
             time.sleep(2)          
             try:                
-                element = driver.find_element_by_xpath("//a[contains(text(),'Transcript')]").click()     
+                element = driver.find_element_by_xpath("//button[contains(text(),'Transcript')]").click()     
                 transcript = driver.find_element_by_xpath("//ul[@itemprop='transcript']").text        
                 if transcript != "":
                     outFile = open(path + "transcripts/" + youtube_id, "w")
@@ -126,9 +127,11 @@ def collect_video_links(path):
         try:
             if topic not in collected_topics:
                 time.sleep(1)
-                video_api = "http://www.khanacademy.org/api/v1/topic/" + topic + "/videos"
-                response = urllib2.urlopen(video_api)
+                video_api = "http://www.khanacademy.org/api/v1/topic/" + topic.split("~")[-1] + "/videos"
+                print(video_api)
+                response = urllib.request.urlopen(video_api)
                 videos = json.loads(response.read())
+                print("videos, videos", videos)
                 if len(videos) != 0:
                     save_file(videos, path + "topic_videos/" + topic)
                 collected_topics.add(topic)
@@ -148,6 +151,7 @@ def collect_video_links(path):
         if video_file != ".DS_Store":
             object = json.loads(open(path + "topic_videos/" + video_file, "r").read())
             for tuple in object:
+                video_file = video_file.split("~")[-1]
                 video_link_map[tuple["youtube_id"]] = {"ka_url":tuple["ka_url"], "component_name":video_file, "topic_category":component_topic_relation[video_file]}
     print("There is a total of %d videos." % len(video_link_map))
     save_file(video_link_map, path + "all_video_links")
@@ -164,8 +168,8 @@ def iterate_topictree_nodes(object, level, array):
   
 def get_topic_links(path, url):
     # ==> Download topictrees
-    response = urllib2.urlopen(url)
-    topictree = response.read()
+    response = urllib.request.urlopen(url)
+    topictree = response.read().decode('utf-8')
     save_file(topictree, path + 'topictree.json')
     
     # ==> Iterate over the whole topictree
@@ -180,18 +184,20 @@ def get_topic_links(path, url):
     processed_topics = set()
     files = os.listdir(path  + "topics")
     for file in files:
-        processed_topics.add(file)
+        processed_topics.add(file.split("~")[-1])
     print("%d topics have been processed." % len(processed_topics))
     
     for component in course_components:
+        print('course_components', component)
         try:
             topic = component.split("/")[-1]
             if topic != '' and topic not in processed_topics:
                 time.sleep(1)
-                exercise_api = "http://www.khanacademy.org/api/v1/topic/" + topic
-                response = urllib2.urlopen(exercise_api)
+                exercise_api = "http://www.khanacademy.org/api/v1/topic/" + topic 
+
+                response = urllib.request.urlopen(exercise_api)
                 response = json.loads(response.read())
-                save_file(response, path + "topics/" + topic)
+                save_file(response, path + "topics/" + ("~").join(component.split("/")))
                 processed_topics.add(topic)
         except Exception as e:
             print(e)
@@ -200,16 +206,18 @@ def get_topic_links(path, url):
    
 ######################################################################    
 def main():
-    data_path = '../../data/khan/khan_crawled_data/'
+    
+
+    data_path = '/home/venktesh/iiit-journey-books-papers/phd-research/LearningQ/data/khan_crawled_data/'
 
     # Step 1: retrieve and save topictree file
     url = 'http://www.khanacademy.org/api/v1/topictree'
-    get_topic_links(data_path, url)
+    # get_topic_links(data_path, url)
         
     # Step 2: collect video links
     collect_video_links(data_path)
 
-    # Step 3: download video transcripts
+    # # Step 3: download video transcripts
     download_transcript_from_khan(data_path)
     
     # Step 4: gather discussion on video

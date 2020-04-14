@@ -86,7 +86,7 @@ def download_transcript_from_khan(path):
     driver.maximize_window()
     
     for youtube_id in video_link_map.keys(): 
-        if youtube_id not in collected_videos and video_link_map[youtube_id]["topic_category"] == "science":
+        if youtube_id not in collected_videos and video_link_map[youtube_id]["topic_category"]:
             driver.get(video_link_map[youtube_id]["ka_url"])
             time.sleep(2)          
             try:                
@@ -215,7 +215,7 @@ def main():
     # get_topic_links(data_path, url)
         
     # Step 2: collect video links
-    collect_video_links(data_path)
+    # collect_video_links(data_path)
 
     # # Step 3: download video transcripts
     download_transcript_from_khan(data_path)

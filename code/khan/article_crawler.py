@@ -69,7 +69,7 @@ def download_articles(path):
     
     collected_articles = set()
     if not os.path.isdir(path + "articles/"):
-        os.mkdir( + "articles/")
+        os.mkdir( path + "articles/")
     article_files = os.listdir(path + "articles/")
     for article_file in article_files:
         if article_file != ".DS_Store":
@@ -80,7 +80,7 @@ def download_articles(path):
         if article_id not in collected_articles:
             try:
                 article_api = "http://www.khanacademy.org/api/v1/articles/" + article_id
-                response = urllib.urlopen(article_api)
+                response = urllib.request.urlopen(article_api)
                 article = json.loads(response.read())
                 save_file(article, path + "articles/" + article_id)
             except:
@@ -98,11 +98,12 @@ def gather_article_ids(path):
     article_map = {}
     topic_files = os.listdir(path + "topics/")
     for topic_file in topic_files:
+         
         if topic_file != ".DS_Store":
             jsonObject = json.loads(open(path + "topics/" + topic_file, "r").read())
             for tuple in jsonObject["children"]:
                 if tuple["kind"] == "Article":
-                    article_map[tuple["internal_id"]] = {"ka_url":tuple["url"], "topic_category":component_topic_relation[topic_file]}
+                    article_map[tuple["internal_id"]] = {"ka_url":tuple["url"],"component_name":topic_file.split("~")[-1], "topic_category":component_topic_relation[topic_file.split("~")[-1]]}
                     
     print("There is a total of %d articles." % len(article_map))
     save_file(article_map, path + "all_article_links")
@@ -111,7 +112,7 @@ def gather_article_ids(path):
 
 ######################################################################    
 def main():
-    data_path = '/home/venktesh/iiit-journey-books-papers/phd-research/LearningQ/data/khan/crawled_data/'
+    data_path = '/home/venktesh/iiit-journey-books-papers/phd-research/LearningQ/data/khan_crawled_data/'
     
     # Step 1: gather article list
     gather_article_ids(data_path)

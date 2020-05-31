@@ -208,10 +208,10 @@ def main():
 
     # Step 1: retrieve and save topictree file
     url = 'http://www.khanacademy.org/api/v1/topictree'
-    # get_topic_links(data_path, url)
+    get_topic_links(data_path, url)
         
     # Step 2: collect video links
-    # collect_video_links(data_path)
+    collect_video_links(data_path)
 
     # # Step 3: download video transcripts
     download_transcript_from_khan(data_path)

@@ -11,7 +11,7 @@ import sys
 from functions import save_file, gather_topic_hierarchy
 import urllib, json, os, time
 from selenium import webdriver
-    
+from webdriver_manager.chrome import ChromeDriverManager
 
 def collect_article_discussion(path):
     article_map = json.loads(open(path + "all_article_links", "r").read())
@@ -28,7 +28,7 @@ def collect_article_discussion(path):
     print("There are %d article discussion have been collected." % len(collected_articles))
     
     # Collect article discussions
-    driver = webdriver.Chrome(executable_path='../chromedriver')
+    driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.maximize_window()
     
     for article_id in article_map.keys():             

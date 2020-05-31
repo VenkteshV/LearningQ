@@ -1,7 +1,3 @@
-'''
-Created on Dec 1, 2017
-@author: Guanliang Chen
-'''
 
 import sys
 # reload(sys)

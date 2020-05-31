@@ -6,7 +6,7 @@ Created on Nov 30, 2017
 import os, json, urlparse
 
 def main():
-    path = '../../data/khan/khan_crawled_data/'
+    path = '/home/venktesh/iiit-journey-books-papers/phd-research/LearningQ/data/khan_crawled_data/'
     
     collected_transcripts = set()
     if not os.path.isdir(path + "transcripts/"):
